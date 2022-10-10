@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { assert } from '$lib';
+	import { assert, createResizer } from '$lib';
 
 	let canvas: HTMLCanvasElement;
 
@@ -126,6 +126,13 @@ void main() {
 		gl.useProgram(null);
 	}
 
+	function reshape(width: number, height: number) {
+		gl.viewport(0, 0, width, height);
+	}
+
+	const width = 500;
+	const height = 500;
+
 	onMount(() => {
 		const ctx = canvas.getContext('webgl2');
 		assert(ctx);
@@ -133,17 +140,29 @@ void main() {
 
 		init();
 
+		const { disconnectObserver, resizeToDisplaySize } = createResizer(canvas, reshape);
+
 		let raf: number;
 
 		(function loop() {
+			resizeToDisplaySize();
 			display();
 			raf = requestAnimationFrame(loop);
 		})();
 
 		return () => {
 			cancelAnimationFrame(raf);
+			disconnectObserver();
 		};
 	});
 </script>
 
-<canvas bind:this={canvas} />
+<canvas bind:this={canvas} {width} {height} />
+
+<style>
+	canvas {
+		width: 100%;
+		height: 100%;
+		image-rendering: crisp-edges;
+	}
+</style>
