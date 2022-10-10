@@ -130,8 +130,22 @@ void main() {
 		gl.viewport(0, 0, width, height);
 	}
 
+	function keyboard(key: number) {
+		switch (key) {
+			case 27:
+				destroy();
+				break;
+		}
+	}
+
 	const width = 500;
 	const height = 500;
+
+	function keydown(event: KeyboardEvent) {
+		keyboard(event.keyCode);
+	}
+
+	let destroy: () => void;
 
 	onMount(() => {
 		const ctx = canvas.getContext('webgl2');
@@ -140,7 +154,12 @@ void main() {
 
 		init();
 
-		const { disconnectObserver, resizeToDisplaySize } = createResizer(canvas, reshape);
+		const { disconnectObserver, resizeToDisplaySize } = createResizer(
+			canvas,
+			reshape,
+			width,
+			height
+		);
 
 		let raf: number;
 
@@ -150,14 +169,18 @@ void main() {
 			raf = requestAnimationFrame(loop);
 		})();
 
-		return () => {
+		destroy = () => {
 			cancelAnimationFrame(raf);
 			disconnectObserver();
 		};
+
+		return destroy;
 	});
 </script>
 
 <canvas bind:this={canvas} {width} {height} />
+
+<svelte:window on:keydown={keydown} />
 
 <style>
 	canvas {
