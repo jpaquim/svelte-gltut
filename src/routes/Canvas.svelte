@@ -126,8 +126,23 @@ void main() {
 		gl.useProgram(null);
 	}
 
+	const aspectRatio = 1;
+
 	function reshape(width: number, height: number) {
-		gl.viewport(0, 0, width, height);
+		let x = 0;
+		let y = 0;
+		let viewportWidth = width;
+		let viewportHeight = height;
+		if (width > aspectRatio * height) {
+			viewportWidth = aspectRatio * height;
+			x = (width - viewportWidth) / 2;
+		} else {
+			viewportHeight = width / aspectRatio;
+			y = (height - viewportHeight) / 2;
+		}
+		gl.viewport(x, y, viewportWidth, viewportHeight);
+		// to ignore aspect ratio:
+		// gl.viewport(0, 0, width, height);
 	}
 
 	function keyboard(key: number) {
@@ -137,9 +152,6 @@ void main() {
 				break;
 		}
 	}
-
-	const width = 500;
-	const height = 500;
 
 	function keydown(event: KeyboardEvent) {
 		keyboard(event.keyCode);
@@ -154,12 +166,17 @@ void main() {
 
 		init();
 
+		const width = canvas.clientWidth * devicePixelRatio;
+		const height = canvas.clientHeight * devicePixelRatio;
+
 		const { disconnectObserver, resizeToDisplaySize } = createResizer(
 			canvas,
 			reshape,
 			width,
 			height
 		);
+		resizeToDisplaySize();
+		reshape(width, height);
 
 		let raf: number;
 
@@ -178,7 +195,7 @@ void main() {
 	});
 </script>
 
-<canvas bind:this={canvas} {width} {height} />
+<canvas bind:this={canvas} />
 
 <svelte:window on:keydown={keydown} />
 
