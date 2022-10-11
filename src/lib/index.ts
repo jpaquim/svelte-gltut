@@ -1,3 +1,7 @@
+import Canvas from './Canvas.svelte';
+
+export { Canvas };
+
 export function assert<T>(
 	value: T,
 	message = `Assert failed: ${value}`
