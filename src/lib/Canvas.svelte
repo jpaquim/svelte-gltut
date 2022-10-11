@@ -10,7 +10,10 @@
 
 	export let keyboard: (key: number) => void;
 
-	// type assertion to avoid
+	export let width = 0;
+	export let height = 0;
+
+	// set to null to avoid svelte missing prop warning, force type assertion
 	export let gl = null as unknown as WebGL2RenderingContext;
 
 	export let destroy = () => {};
@@ -28,22 +31,19 @@
 
 		init();
 
-		const width = canvas.clientWidth * devicePixelRatio;
-		const height = canvas.clientHeight * devicePixelRatio;
-
-		const { disconnectObserver, resizeToDisplaySize } = createResizer(
+		const { disconnectObserver, resizeToTarget, initial } = createResizer(
 			canvas,
 			reshape,
 			width,
 			height
 		);
-		resizeToDisplaySize();
-		reshape(width, height);
+		resizeToTarget();
+		reshape(initial.width, initial.height);
 
 		let raf: number;
 
 		(function loop() {
-			resizeToDisplaySize();
+			resizeToTarget();
 			display();
 			raf = requestAnimationFrame(loop);
 		})();
