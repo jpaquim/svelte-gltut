@@ -1,87 +1,39 @@
 <script lang="ts">
-	import { Canvas, assert } from '$lib';
-	import strVertexShader from './FragPosition.vert?raw';
-	import strFragmentShader from './FragPosition.frag?raw';
+	import { Canvas, assert, createProgram, loadShader } from '$lib';
 
 	let gl: WebGL2RenderingContext;
 
 	let destroy: () => void;
 
-	function createShader(eShaderType: number, strShaderFile: string): WebGLShader {
-		const shader = gl.createShader(eShaderType);
-		assert(shader);
-
-		gl.shaderSource(shader, strShaderFile);
-
-		gl.compileShader(shader);
-
-		const status = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-		if (!status) {
-			const strInfoLog = gl.getShaderInfoLog(shader);
-			const strShaderType = {
-				[gl.VERTEX_SHADER]: 'vertex',
-				[gl.FRAGMENT_SHADER]: 'fragment'
-			}[eShaderType];
-			console.error(`Compile failure in ${strShaderType}:\n${strInfoLog}`);
-		}
-
-		return shader;
-	}
-
-	function createProgram(shaderList: WebGLShader[]): WebGLProgram {
-		const program = gl.createProgram();
-		assert(program);
-
-		for (const shader of shaderList) {
-			gl.attachShader(program, shader);
-		}
-
-		gl.linkProgram(program);
-
-		const status = gl.getProgramParameter(program, gl.LINK_STATUS);
-		if (!status) {
-			const strInfoLog = gl.getProgramInfoLog(program);
-			console.error(`Linker failure: ${strInfoLog}`);
-		}
-
-		for (const shader of shaderList) {
-			gl.detachShader(program, shader);
-		}
-
-		return program;
-	}
-
 	let theProgram: WebGLProgram;
 
-	function initializeProgram() {
-		const shaderList = [
-			createShader(gl.VERTEX_SHADER, strVertexShader),
-			createShader(gl.FRAGMENT_SHADER, strFragmentShader)
-		];
+	async function initializeProgram() {
+		const shaderList = await Promise.all([
+			loadShader(gl.VERTEX_SHADER, 'frag-position.vert'),
+			loadShader(gl.FRAGMENT_SHADER, 'frag-position.frag')
+		]);
 
 		theProgram = createProgram(shaderList);
 	}
 
-	const vertexPositions = new Float32Array([
-		0.75, 0.75, 0, 1, 0.75, -0.75, 0, 1, -0.75, -0.75, 0, 1
-	]);
+	const vertexData = new Float32Array([0.75, 0.75, 0, 1, 0.75, -0.75, 0, 1, -0.75, -0.75, 0, 1]);
 
-	let positionBufferObject: WebGLBuffer;
+	let vertexBufferObject: WebGLBuffer;
 	let vao: WebGLVertexArrayObject;
 	let positionAttribLocation: number;
 
 	function initializeVertexBuffer() {
 		const buffer = gl.createBuffer();
 		assert(buffer);
-		positionBufferObject = buffer;
+		vertexBufferObject = buffer;
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, positionBufferObject);
-		gl.bufferData(gl.ARRAY_BUFFER, vertexPositions, gl.STATIC_DRAW);
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferObject);
+		gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
 	}
 
-	function init() {
-		initializeProgram();
+	async function init() {
+		await initializeProgram();
 		initializeVertexBuffer();
 
 		const vertexArray = gl.createVertexArray();
@@ -98,7 +50,7 @@
 
 		gl.useProgram(theProgram);
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, positionBufferObject);
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferObject);
 		gl.enableVertexAttribArray(positionAttribLocation);
 		gl.vertexAttribPointer(positionAttribLocation, 4, gl.FLOAT, false, 0, 0);
 

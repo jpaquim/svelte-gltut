@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { assert, createResizer } from '$lib';
+	import { assert, createResizer, setContext } from '$lib';
 
-	export let init: () => void;
+	export let init: () => void | Promise<void>;
 
 	export let display: () => void;
 
@@ -29,7 +29,7 @@
 		assert(ctx);
 		gl = ctx;
 
-		init();
+		setContext(gl);
 
 		const { disconnectObserver, resizeToTarget, initial } = createResizer(
 			canvas,
@@ -40,20 +40,24 @@
 		resizeToTarget();
 		reshape(initial.width, initial.height);
 
+		const promise = init();
+
+		const start = promise instanceof Promise ? promise.then.bind(promise) : requestAnimationFrame;
+
 		let raf: number;
 
-		(function loop() {
+		function loop() {
 			resizeToTarget();
 			display();
 			raf = requestAnimationFrame(loop);
-		})();
+		}
 
-		destroy = () => {
+		start(loop);
+
+		return (destroy = () => {
 			cancelAnimationFrame(raf);
 			disconnectObserver();
-		};
-
-		return destroy;
+		});
 	});
 </script>
 
