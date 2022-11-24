@@ -15,12 +15,15 @@ function handleError(error: unknown) {
 }
 
 export async function loadShader(
-	eShaderType: number,
-	strShaderFilename: string
+	shaderType: number,
+	shaderFilename: string,
+	n: number
 ): Promise<WebGLShader> {
-	const strShaderFile = (await import(`./shaders/${strShaderFilename}.glsl?raw`)).default;
+	const folder = String(n).padStart(2, '0');
+	const module = await import(`./tutorials/${folder}/data/${shaderFilename}.glsl?raw`);
+	const shaderText = module.default;
 	try {
-		return compileShader(gl, eShaderType, strShaderFile);
+		return compileShader(gl, shaderType, shaderText);
 	} catch (error) {
 		handleError(error);
 		throw error;

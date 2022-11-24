@@ -9,8 +9,8 @@
 
 	async function initializeProgram() {
 		const shaderList = await Promise.all([
-			loadShader(gl.VERTEX_SHADER, 'vertex-colors.vert'),
-			loadShader(gl.FRAGMENT_SHADER, 'vertex-colors.frag')
+			loadShader(gl.VERTEX_SHADER, 'vertex-colors.vert', 2),
+			loadShader(gl.FRAGMENT_SHADER, 'vertex-colors.frag', 2)
 		]);
 
 		theProgram = createProgram(shaderList);
