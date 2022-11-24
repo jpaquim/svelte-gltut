@@ -1,4 +1,4 @@
-export type TutorialModule = typeof import('./01/hello-triangle.svelte');
+export type ChapterModule = typeof import('./01/hello-triangle.svelte');
 export { default as HelloTriangle } from './01/hello-triangle.svelte';
 export { default as FragPosition } from './02/frag-position.svelte';
 export { default as VertexColors } from './02/vertex-colors.svelte';

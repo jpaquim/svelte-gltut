@@ -17,10 +17,10 @@ function handleError(error: unknown) {
 export async function loadShader(
 	shaderType: number,
 	shaderFilename: string,
-	n: number
+	chapter: number
 ): Promise<WebGLShader> {
-	const folder = String(n).padStart(2, '0');
-	const module = await import(`./tutorials/${folder}/data/${shaderFilename}.glsl?raw`);
+	const folder = String(chapter).padStart(2, '0');
+	const module = await import(`./chapters/${folder}/data/${shaderFilename}.glsl?raw`);
 	const shaderText = module.default;
 	try {
 		return compileShader(gl, shaderType, shaderText);
