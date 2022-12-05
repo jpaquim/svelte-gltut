@@ -8,7 +8,7 @@
 
 	export let reshape: (width: number, height: number) => void;
 
-	export let keyboard: (key: number) => void;
+	export let keyboard: ((keyCode: number) => void) | ((keyCode: number, key: string) => void);
 
 	export let width = 0;
 	export let height = 0;
@@ -21,7 +21,7 @@
 	let canvas: HTMLCanvasElement;
 
 	function keydown(event: KeyboardEvent) {
-		keyboard(event.keyCode);
+		keyboard(event.keyCode, event.key);
 	}
 
 	onMount(() => {
