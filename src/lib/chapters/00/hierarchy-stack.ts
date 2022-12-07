@@ -85,6 +85,135 @@ function translate(matrix: mat4, offsetVec: vec3) {
 	return mat4.multiply(mat4.create(), matrix, translateMat);
 }
 
+interface SceneProps {
+	posBase: vec3;
+	angBase: number;
+	posBaseLeft: vec3;
+	posBaseRight: vec3;
+	scaleBaseZ: number;
+	angUpperArm: number;
+	sizeUpperArm: number;
+	posLowerArm: vec3;
+	angLowerArm: number;
+	lenLowerArm: number;
+	widthLowerArm: number;
+	posWrist: vec3;
+	angWristRoll: number;
+	angWristPitch: number;
+	lenWrist: number;
+	widthWrist: number;
+	posLeftFinger: vec3;
+	posRightFinger: vec3;
+	angFingerOpen: number;
+	lenFinger: number;
+	widthFinger: number;
+	angLowerFinger: number;
+}
+
+const scene = ({
+	posBase,
+	angBase,
+	posBaseLeft,
+	posBaseRight,
+	scaleBaseZ,
+	angUpperArm,
+	sizeUpperArm,
+	posLowerArm,
+	angLowerArm,
+	lenLowerArm,
+	widthLowerArm,
+	posWrist,
+	angWristRoll,
+	angWristPitch,
+	lenWrist,
+	widthWrist,
+	posLeftFinger,
+	posRightFinger,
+	angFingerOpen,
+	lenFinger,
+	widthFinger,
+	angLowerFinger
+}: SceneProps) => ({
+	origin: posBase,
+	angles: [{ y: angBase }],
+	children: [
+		{
+			origin: posBaseLeft,
+			size: vec3.fromValues(1, 1, scaleBaseZ)
+		},
+		{
+			origin: posBaseRight,
+			size: vec3.fromValues(1, 1, scaleBaseZ)
+		},
+		{
+			angles: [{ x: angUpperArm }],
+			children: [
+				{
+					origin: vec3.fromValues(0, 0, sizeUpperArm / 2 - 1),
+					size: vec3.fromValues(1, 1, sizeUpperArm / 2)
+				},
+				{
+					origin: posLowerArm,
+					angles: [{ x: angLowerArm }],
+					children: [
+						{
+							origin: vec3.fromValues(0, 0, lenLowerArm / 2),
+							size: vec3.fromValues(widthLowerArm / 2, widthLowerArm / 2, lenLowerArm / 2)
+						},
+						{
+							origin: posWrist,
+							angles: [{ z: angWristRoll }, { x: angWristPitch }],
+							size: vec3.fromValues(widthWrist / 2, widthWrist / 2, lenWrist / 2),
+							children: [
+								{
+									origin: posLeftFinger,
+									angles: [{ y: angFingerOpen }],
+									children: [
+										{
+											origin: vec3.fromValues(0, 0, lenFinger / 2),
+											size: vec3.fromValues(widthFinger / 2, widthFinger / 2, lenFinger / 2)
+										},
+										{
+											origin: vec3.fromValues(0, 0, lenFinger),
+											angles: [{ y: -angLowerFinger }],
+											children: [
+												{
+													origin: vec3.fromValues(0, 0, lenFinger / 2),
+													size: vec3.fromValues(widthFinger / 2, widthFinger / 2, lenFinger / 2)
+												}
+											]
+										}
+									]
+								},
+								{
+									origin: posRightFinger,
+									angles: [{ y: -angFingerOpen }],
+									children: [
+										{
+											origin: vec3.fromValues(0, 0, lenFinger / 2),
+											size: vec3.fromValues(widthFinger / 2, widthFinger / 2, lenFinger / 2)
+										},
+										{
+											origin: vec3.fromValues(0, 0, lenFinger),
+											angles: [{ y: angLowerFinger }],
+											children: [
+												{
+													origin: vec3.fromValues(0, 0, lenFinger / 2),
+													size: vec3.fromValues(widthFinger / 2, widthFinger / 2, lenFinger / 2)
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+});
+
 const STANDARD_ANGLE_INCREMENT = 11.25;
 const SMALL_ANGLE_INCREMENT = 9;
 
@@ -123,118 +252,11 @@ export class Hierarchy {
 	scene: Node;
 
 	constructor() {
-		this.scene = this.makeScene();
-	}
-
-	makeScene() {
-		return {
-			origin: this.posBase,
-			angles: [{ y: this.angBase }],
-			children: [
-				{
-					origin: this.posBaseLeft,
-					size: vec3.fromValues(1, 1, this.scaleBaseZ)
-				},
-				{
-					origin: this.posBaseRight,
-					size: vec3.fromValues(1, 1, this.scaleBaseZ)
-				},
-				{
-					angles: [{ x: this.angUpperArm }],
-					children: [
-						{
-							origin: vec3.fromValues(0, 0, this.sizeUpperArm / 2 - 1),
-							size: vec3.fromValues(1, 1, this.sizeUpperArm / 2)
-						},
-						{
-							origin: this.posLowerArm,
-							angles: [{ x: this.angLowerArm }],
-							children: [
-								{
-									origin: vec3.fromValues(0, 0, this.lenLowerArm / 2),
-									size: vec3.fromValues(
-										this.widthLowerArm / 2,
-										this.widthLowerArm / 2,
-										this.lenLowerArm / 2
-									)
-								},
-								{
-									origin: this.posWrist,
-									angles: [{ z: this.angWristRoll }, { x: this.angWristPitch }],
-									size: vec3.fromValues(
-										this.widthWrist / 2,
-										this.widthWrist / 2,
-										this.lenWrist / 2
-									),
-									children: [
-										{
-											origin: this.posLeftFinger,
-											angles: [{ y: this.angFingerOpen }],
-											children: [
-												{
-													origin: vec3.fromValues(0, 0, this.lenFinger / 2),
-													size: vec3.fromValues(
-														this.widthFinger / 2,
-														this.widthFinger / 2,
-														this.lenFinger / 2
-													)
-												},
-												{
-													origin: vec3.fromValues(0, 0, this.lenFinger),
-													angles: [{ y: -this.angLowerFinger }],
-													children: [
-														{
-															origin: vec3.fromValues(0, 0, this.lenFinger / 2),
-															size: vec3.fromValues(
-																this.widthFinger / 2,
-																this.widthFinger / 2,
-																this.lenFinger / 2
-															)
-														}
-													]
-												}
-											]
-										},
-										{
-											origin: this.posRightFinger,
-											angles: [{ y: -this.angFingerOpen }],
-											children: [
-												{
-													origin: vec3.fromValues(0, 0, this.lenFinger / 2),
-													size: vec3.fromValues(
-														this.widthFinger / 2,
-														this.widthFinger / 2,
-														this.lenFinger / 2
-													)
-												},
-												{
-													origin: vec3.fromValues(0, 0, this.lenFinger),
-													angles: [{ y: this.angLowerFinger }],
-													children: [
-														{
-															origin: vec3.fromValues(0, 0, this.lenFinger / 2),
-															size: vec3.fromValues(
-																this.widthFinger / 2,
-																this.widthFinger / 2,
-																this.lenFinger / 2
-															)
-														}
-													]
-												}
-											]
-										}
-									]
-								}
-							]
-						}
-					]
-				}
-			]
-		};
+		this.scene = scene(this);
 	}
 
 	updateScene() {
-		this.scene = this.makeScene();
+		this.scene = scene(this);
 	}
 
 	draw(drawArgs: DrawArgs) {
