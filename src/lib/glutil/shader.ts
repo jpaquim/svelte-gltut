@@ -1,4 +1,4 @@
-import { assert } from './utils';
+import { assert } from '../utils';
 
 export function compileShader(gl: WebGL2RenderingContext, shaderType: number, shaderText: string) {
 	const shader = gl.createShader(shaderType);
