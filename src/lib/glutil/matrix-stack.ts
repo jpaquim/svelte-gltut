@@ -1,7 +1,6 @@
 import { mat4, vec2, vec3 } from 'gl-matrix';
+import { degToRad } from '../framework';
 import { assert } from '../utils';
-
-const degToRad = (angDeg: number) => angDeg * (Math.PI / 180);
 
 /**
  * Implements a stack for glm::mat4 transformations.

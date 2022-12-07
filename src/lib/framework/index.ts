@@ -1,4 +1,6 @@
-import { compileShader, linkProgram } from './glutil';
+import { compileShader, linkProgram } from '../glutil';
+
+export * from './mesh';
 
 let gl: WebGL2RenderingContext;
 
@@ -14,13 +16,15 @@ function handleError(error: unknown) {
 	}
 }
 
+export const degToRad = (angDeg: number) => angDeg * (Math.PI / 180);
+
 export async function loadShader(
 	shaderType: number,
 	shaderFilename: string,
 	chapter: number
 ): Promise<WebGLShader> {
 	const folder = String(chapter).padStart(2, '0');
-	const module = await import(`./chapters/${folder}/data/${shaderFilename}.glsl?raw`);
+	const module = await import(`../chapters/${folder}/data/${shaderFilename}.glsl?raw`);
 	const shaderText = module.default;
 	try {
 		return compileShader(gl, shaderType, shaderText);
