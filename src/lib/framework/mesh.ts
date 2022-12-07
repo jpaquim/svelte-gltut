@@ -13,7 +13,7 @@ interface AttribType {
 	normalized: boolean;
 	type: GLenum;
 	numBytes: number;
-	parseFunc: (v: AttribData[], s: ReadableStream) => void;
+	parseFunc: (v: AttribData[], s: string) => void;
 	writeToBuffer: (e: GLenum, v: AttribData[], i: number, s: number) => void;
 }
 
@@ -55,7 +55,7 @@ class Attribute {
 
 		// TODO: ...
 
-		this.attribType?.parseFunc(this.dataArray, new ReadableStream());
+		this.attribType?.parseFunc(this.dataArray, '');
 
 		if (this.dataArray.length === 0) throw new Error('The attribute must have an array of values.');
 		if (this.dataArray.length % this.size !== 0)
@@ -63,18 +63,87 @@ class Attribute {
 	}
 }
 
-class IndexData {}
+class IndexData {
+	attribType: AttribType | null;
+	dataArray: AttribData[] = [];
+	// const AttribType *pAttribType;
+	// std::vector<AttribData> dataArray;
 
-class MeshData {}
+	constructor(indexElem?: Element) {
+		if (indexElem) {
+			const type = indexElem.getAttribute('type');
+
+			if (type != 'uint' && type != 'ushort' && type != 'ubyte')
+				throw new Error("Improper 'type' attribute value on 'index' element.");
+
+			this.attribType = getAttribType(type);
+
+			// Read the text
+			let s = '';
+			for (const child of indexElem.children) {
+				s += child.textContent;
+			}
+			this.attribType.parseFunc(this.dataArray, s);
+			if (this.dataArray.length === 0)
+				throw new Error('The index element must have an array of values.');
+		} else {
+			this.attribType = null;
+		}
+	}
+
+	calcByteSize() {
+		return this.dataArray.length * (this.attribType as AttribType).numBytes;
+	}
+}
+
+function processRenderCmd(cmdElem: Element) {
+	const cmd = new RenderCmd();
+
+	return cmd;
+}
+
+type VAOMap = Record<string, GLuint>;
+type VAOMapData = GLuint;
+
+class MeshData {
+	attribArraysBuffer: GLuint = 0;
+	indexBuffer: GLuint = 0;
+	vao: GLuint = 0;
+
+	namedVAOs: VAOMap = {};
+
+	primitives: RenderCmd[] = [];
+
+	destroy() {
+		// TODO
+	}
+}
 
 export class Mesh {
 	data = new MeshData();
 
-	constructor(strFilename: string) {
-		// TODO
+	constructor(filename: string) {
+		const attribs: Attribute[] = [];
+		const attribIndexMap: Record<GLuint, number> = {}; // Maps from attribute indices to 'attribs' indices.
+
+		const indexData: IndexData[] = [];
+
+		const namedVaoList: [string, GLuint[]][] = [];
+
+		{
+			// TODO
+		}
 	}
 
-	render() {
+	render(meshName?: string) {
+		if (!meshName) {
+			// TODO
+		} else {
+			// TODO
+		}
+	}
+
+	deleteObjects() {
 		// TODO
 	}
 }
